@@ -166,8 +166,8 @@ for line in fp.readlines():
         add_str=line
 #add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'Please follow the below picture to operate...'
 #add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'I do not know what happened.... Please Help Me!'
-#add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'Please review these items......'
-add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'Want to introduce you a new method...'
+add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'Please review these items......'
+#add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'Want to introduce you a new method...'
 str = add_plurk(add_str, api_key)
 
 fp.close()
