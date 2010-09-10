@@ -27,6 +27,8 @@ from SimpleHTTPServer import SimpleHTTPRequestHandler
 from time import time
 import subprocess
 import socket
+import twitpic
+
 api_key = 'F5u9WwGjNK16iiMYPlU18wPqLNnX6ZrX'
 ##api_key = '0ZygrfNtpK5Von4w0xXXzbGBvdRQmJBt'
 
@@ -35,7 +37,6 @@ s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.connect(("www.google.com",80))
 IP_addr,port= s.getsockname()
 
-#IP_addr='192.168.0.100'
 # --- login Plurk----------------------------------------------
 def login_plurk(apikey):
 	lp = opener.open(get_api_url('/Users/login'),
@@ -71,6 +72,19 @@ os.system("clear")
 print "\nYour are at:\t",IP_addr
 
 #Print the menu for user
+### Choose what service
+print "Please choose which the social network service you want to use:\n"
+try:
+	service=int(raw_input( "\
+        (1) Plurk \n  \
+	(2) Twitter \n \
+	(3) Facebook \n \
+	\n  \
+	>> ")) 
+except(ValueError):
+	##print "\nPlease enter the correct option again.\n"
+	sys.exit()
+
 print "Please choose the usage you want below:\n"
 try:
 	opt=int(raw_input( "\
@@ -80,7 +94,7 @@ try:
 	\n  \
 	>> ")) 
 except(ValueError):
-	print "\nPlease enter the correct option again.\n"
+	##print "\nPlease enter the correct option again.\n"
 	sys.exit()
 
 if opt== 1:
@@ -143,76 +157,90 @@ hiding_time=time()-t
 print ("\n\nTime of hiding encrypted data to image: %f \n" % hiding_time)
 
 #Plurk Setup
+if service==1:
+    ### timestamp of plurk start
+    t=time()
 
-### timestamp of plurk start
-t=time()
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
+    #api_key = '0ZygrfNtpK5Von4w0xXXzbGBvdRQmJBt'
+    get_api_url = lambda x: 'http://www.plurk.com/API%s' % x
+    encode = urllib.urlencode
 
-opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
-#api_key = '0ZygrfNtpK5Von4w0xXXzbGBvdRQmJBt'
-get_api_url = lambda x: 'http://www.plurk.com/API%s' % x
-encode = urllib.urlencode
+    #### Plurk login    
+    login_plurk(api_key)
 
-#### Plurk login    
-login_plurk(api_key)
+    #### add Plurk
+    ###Need add random words to prevent flood block...
 
-#### add Plurk
-###Need add random words to prevent flood block...
+    add_str='haha'
+    fp = open("good_words.txt", "r")
+    for line in fp.readlines():
+        if line==random.randint(1,9):
+            print line
+            add_str=line
 
-add_str='haha'
-fp = open("good_words.txt", "r")
-for line in fp.readlines():
-    if line==random.randint(1,9):
-        print line
-        add_str=line
-#add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'Please follow the below picture to operate...'
-#add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'I do not know what happened.... Please Help Me!'
-add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'Please review these items......'
-#add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'Want to introduce you a new method...'
-str = add_plurk(add_str, api_key)
+    ###  slogan
+    #add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'Please follow the below picture to operate...'
+    #add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'I do not know what happened.... Please Help Me!'
+    add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'Please review these items......'
+    #add_str = '[ISSUE'+ str(random.randint(0,99))+']'+'Want to introduce you a new method...'
 
-fp.close()
+    str = add_plurk(add_str, api_key)
 
-#### get the plurk_id
-p_str = '\"plurk_id\":'
-left_num = str.find(p_str)
-p_id = str[left_num+12:left_num+21]
-print "Plurk id: "+p_id+" post has been updated."
+    fp.close()
 
-### response to the plurk
-if IP_addr==0:
-    resstr= 'http://localhost:8888/output.png' 
-else:
-    resstr= 'http://%s:8888/output.png' % IP_addr
+    #### get the plurk_id
+    p_str = '\"plurk_id\":'
+    left_num = str.find(p_str)
+    p_id = str[left_num+12:left_num+21]
+    print "Plurk id: "+p_id+" post has been updated."
 
-#resstr='http://'+os.system("ifconfig eth1 | grep '192.168' | awk '{print $3}' | sed -e s/.*://")+':8888/output.png'
-#print "Plurk %s" % resstr
-response_plurk(resstr, p_id, api_key)
+    ### response to the plurk
+    if IP_addr==0:
+        resstr= 'http://localhost:8888/output.png' 
+    else:
+        resstr= 'http://%s:8888/output.png' % IP_addr
 
-# Logout from Plurk
-fp = opener.open(get_api_url('/Users/logout'),
-		encode({'api_key': api_key}))
-print "Logout from Plurk..."
+    #resstr='http://'+os.system("ifconfig eth1 | grep '192.168' | awk '{print $3}' | sed -e s/.*://")+':8888/output.png'
+    #print "Plurk %s" % resstr
+    response_plurk(resstr, p_id, api_key)
 
-plurk_time=time()-t
-print ("Time of processing Plurk post taken: %f \n" % plurk_time)
+    # Logout from Plurk
+    fp = opener.open(get_api_url('/Users/logout'),
+                    encode({'api_key': api_key}))
+    print "Logout from Plurk..."
 
-#JSON of Plurk reply
-#if Plurk sucess, Setup the SimpleHTTPServer
-#using est evaluate the  reply
+    plurk_time=time()-t
+    print ("Time of processing Plurk post taken: %f \n" % plurk_time)
+
+    #JSON of Plurk reply
+    #if Plurk sucess, Setup the SimpleHTTPServer
+    #using est evaluate the  reply
 
 
 
-HandlerClass = SimpleHTTPRequestHandler
-ServerClass  = BaseHTTPServer.HTTPServer
-Protocol     = "HTTP/1.0"
+    HandlerClass = SimpleHTTPRequestHandler
+    ServerClass  = BaseHTTPServer.HTTPServer
+    Protocol     = "HTTP/1.0"
 
-port=8888
-server_address = (IP_addr, port)
+    port=8888
+    server_address = (IP_addr, port)
 
-HandlerClass.protocol_version = Protocol
-httpd = ServerClass(server_address, HandlerClass)
+    HandlerClass.protocol_version = Protocol
+    httpd = ServerClass(server_address, HandlerClass)
 
-sa = httpd.socket.getsockname()
-os.system("clear")
-print "Serving HTTP on", sa[0], "port", sa[1], "..."
-httpd.serve_forever()
+    sa = httpd.socket.getsockname()
+    os.system("clear")
+    print "Serving HTTP on", sa[0], "port", sa[1], "..."
+    httpd.serve_forever()
+
+## Twitter (twitpic ) upload photos
+if service==2:
+       twit = twitpic.TwitPicAPI('rfc4340', '06111123')
+       #twitpic_url = twit.upload('Screenshot.png') 
+       # Post to Twitter 
+       #twitpic_url = twit.upload('Screenshot.png', post_to_twitter=True) 
+       twitpic_url = twit.upload('Screenshot.png', message='Guess what? I am smart~ haha', post_to_twitter=True) 
+       print "Your picture with the secret message has been uploaded to "+ twitpic_url
+
+if service3:
